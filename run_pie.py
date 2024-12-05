@@ -8,6 +8,7 @@ from torchvision import transforms
 from pipeline_stable_diffusion_pie import StableDiffusionPIEPipeline
 from diffusers import AutoencoderKL, DDPMScheduler, DiffusionPipeline, UNet2DConditionModel
 
+
 def set_all_seeds(SEED):
     # REPRODUCIBILITY
     torch.manual_seed(SEED)
@@ -106,11 +107,27 @@ def main(args):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     
-    device = "cuda"
-    pipe = StableDiffusionPIEPipeline.from_pretrained(model_id_or_path, torch_dtype=torch.float32, cache_dir="./checkpoints", safety_checker=None)
+    device = "cuda" 
+    # original train from scratch
+    # pipe = StableDiffusionPIEPipeline.from_pretrained(model_id_or_path, torch_dtype=torch.float32, cache_dir="./checkpoints", safety_checker=None)
+    # using pretrained model
+    # pipe = StableDiffusionPIEPipeline.from_pretrained(model_id_or_path, torch_dtype=torch.float16, cache_dir="./checkpoints", safety_checker=None)
+    
+    pipe = DiffusionPipeline.from_pretrained(
+                model_id_or_path,
+                revision=args.revision,
+                # variant=args.variant,
+                torch_dtype=torch.float16,
+            )
+
+    # load attention processors
+    pipe.load_lora_weights("finetune_checkpoints")
+    # print(pipe)
+    # exit()
+    
     if finetuned_path != None:
         unet = UNet2DConditionModel.from_pretrained(
-            finetuned_path, subfolder="text_encoder"
+            finetuned_path, subfolder="text_encoder", strict=False
         )
         pipe.unet = unet
     pipe = pipe.to(device)
@@ -134,6 +151,7 @@ def main(args):
         mask.save(os.path.join(output_dir, "mask" + ".png"))
     else:
         mask = None
+        
 
     step_i += 1
     img = init_image
@@ -146,7 +164,7 @@ def main(args):
         step_i += 1
 
     duration = 1000
-    images[0].save('output.gif', save_all=True, append_images=images[1:], duration=duration)
+    images[0].save(os.path.join(output_dir, f'output_{prompt}.gif'), save_all=True, append_images=images[1:], duration=duration)
 
 if __name__ == "__main__":
     args = parse_args()

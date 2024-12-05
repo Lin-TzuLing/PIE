@@ -1,1 +1,1 @@
-Put Stable Diffusion checkpoints here.
+IrohXu/stable-diffusion-mimic-cxr-v0.1
