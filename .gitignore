@@ -1,3 +1,10 @@
+# seld-modified
+checkpoints/*
+copys/*
+datasets/*
+finetune_checkpoints/*
+LICENSE
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
