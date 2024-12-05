@@ -26,6 +26,13 @@ def parse_args(input_args=None):
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
+        "--finetune_lora_path",
+        type=str,
+        default="finetune_checkpoints",
+        required=True,
+        help="Path to lora finetune ckpt.",
+    )
+    parser.add_argument(
         "--revision",
         type=str,
         default=None,
@@ -121,9 +128,8 @@ def main(args):
             )
 
     # load attention processors
-    pipe.load_lora_weights("finetune_checkpoints")
-    # print(pipe)
-    # exit()
+    pipe.load_lora_weights(args.finetune_lora_path)
+
     
     if finetuned_path != None:
         unet = UNet2DConditionModel.from_pretrained(

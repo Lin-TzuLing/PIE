@@ -19,7 +19,7 @@ def set_all_seeds(SEED):
 
 # parameters
 class_id = 0  # 0:Cardiomegaly, 1:Edema, 2:Consolidation, 3:Atelectasis, 4:Pleural Effusion 
-root = './CheXpert-v1.0'
+root = 'dataset/CheXpert-v1.0-small/'
 
 # paramaters
 SEED = 123

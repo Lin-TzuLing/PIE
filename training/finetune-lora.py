@@ -523,7 +523,12 @@ class DreamBoothDataset(Dataset):
     def __getitem__(self, index):
         example = {}
         instance_image, label, meta_data = self.instance_dataset.__getitem__(index)
+        print(meta_data["pathologies"])
+        exit()
+        
+        
         example["instance_images"] = instance_image
+        # 把pathologies加入到prompt中，可以直接變class embedding?這樣可以隨timestep變化
         example["instance_prompt_ids"] = self.tokenizer(
             self.instance_prompt + "," + meta_data["pathologies"],
             truncation=True,
@@ -1060,7 +1065,7 @@ def main(args):
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
 
-                        unwrapped_unet = accelerate.unwrap_model(unet)
+                        unwrapped_unet = accelerator.unwrap_model(unet)
                         unet_lora_state_dict = convert_state_dict_to_diffusers(
                             get_peft_model_state_dict(unwrapped_unet)
                         )

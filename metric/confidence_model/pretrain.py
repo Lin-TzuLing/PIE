@@ -25,7 +25,7 @@ lr = 1e-4
 weight_decay = 1e-5
 
 # dataloader
-root = './CheXpert-v1.0'
+root = 'dataset/CheXpert-v1.0-small/'
 # Index: -1 denotes multi-label mode including 5 diseases
 traindSet = CheXpert(csv_path=root+'train.csv', image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='train', class_index=-1)
 testSet =  CheXpert(csv_path=root+'valid.csv',  image_root_path=root, use_upsampling=False, use_frontal=True, image_size=224, mode='valid', class_index=-1)

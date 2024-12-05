@@ -1,6 +1,7 @@
 python run_pie.py \
     --pretrained_model_name_or_path="IrohXu/stable-diffusion-mimic-cxr-v0.1" \
     --image_path="dataset/CheXpert-v1.0-small/valid/patient64559/study1/view1_frontal.jpg" \
+    --finetune_lora_path="finetune_checkpoints/checkpoint-3500" \
     --prompt="A chest X-ray image" \
     --step=10 \
     --strength=0.5 \

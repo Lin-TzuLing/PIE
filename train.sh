@@ -1,5 +1,15 @@
 # !/bin/bash
 source ~/.bashrc
+# 載入 Pyenv 的初始化腳本
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv virtualenv-init -)"
+
+# 啟用目標環境
+pyenv activate PIE
+# or run "source train.sh"
+
 torchrun  training/finetune-lora.py \
             --pretrained_model_name_or_path="IrohXu/stable-diffusion-mimic-cxr-v0.1" \
             --instance_data_dir="dataset/CheXpert-v1.0-small" \
