@@ -3,7 +3,6 @@ checkpoints/*
 copys/*
 datasets/*
 finetune_checkpoints/*
-LICENSE
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
