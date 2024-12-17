@@ -1,8 +1,18 @@
 # seld-modified
 checkpoints/*
+cache/*
+cache_old/*
 copys/*
 datasets/*
 finetune_checkpoints/*
+checkpoints_lora/*
+checkpoints_trainFromScratch/*
+simulation_lora/*
+simulation_trainFromScratch/*
+simulation_pretrained/*
+ce_finetuned_model.pth
+ce_pretrained_model.pth
+finetuned_model.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

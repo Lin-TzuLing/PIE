@@ -10,6 +10,11 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 from sklearn.metrics import roc_auc_score
 
+
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+
+
 def set_all_seeds(SEED):
     # REPRODUCIBILITY
     torch.manual_seed(SEED)
@@ -69,6 +74,9 @@ for epoch in range(10):
       train_data, train_labels = train_data.cuda(), train_labels.cuda()
       y_pred = model(train_data)
       y_pred = torch.sigmoid(y_pred)
+      
+    #   print(y_pred, train_labels)
+    #   exit()
       loss = loss_fn(y_pred, train_labels)
       optimizer.zero_grad()
       loss.backward()

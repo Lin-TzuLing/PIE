@@ -92,7 +92,7 @@ class ChexPert(Dataset):
 
         # rename pathologies
         self.pathologies = list(np.char.replace(self.pathologies, "Pleural Effusion", "Effusion"))
-        print(self.pathologies)
+        # print(self.pathologies)
 
         ########## add consistent csv values
 

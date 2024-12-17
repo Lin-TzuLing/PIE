@@ -55,6 +55,7 @@ from chexpert import ChexPert
 from retinopathy import Retinopathy
 from skin import ISIC
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '5'
 
 if is_wandb_available():
     import wandb
@@ -585,7 +586,7 @@ def main(args):
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
-        logging_dir=logging_dir,
+        # logging_dir=logging_dir,
         project_config=accelerator_project_config,
     )
 
@@ -1030,6 +1031,7 @@ def main(args):
             text_encoder=accelerator.unwrap_model(text_encoder),
             revision=args.revision,
         )
+        os.makedirs(args.output_dir, exist_ok=True)
         pipeline.save_pretrained(args.output_dir)
 
         if args.push_to_hub:

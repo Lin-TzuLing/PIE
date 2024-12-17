@@ -64,7 +64,10 @@ from diffusers import StableDiffusionPipeline
 from peft import LoraConfig
 from peft.utils import get_peft_model_state_dict
 
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '5'
+# os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+# torch.distributed.init_process_group(backend="nccl", init_method="env://")
+# torch.distributed.destroy_process_group()
 
 if is_wandb_available():
     import wandb
@@ -523,8 +526,8 @@ class DreamBoothDataset(Dataset):
     def __getitem__(self, index):
         example = {}
         instance_image, label, meta_data = self.instance_dataset.__getitem__(index)
-        print(meta_data["pathologies"])
-        exit()
+        # print(meta_data["pathologies"])
+        # exit()
         
         
         example["instance_images"] = instance_image
@@ -908,6 +911,9 @@ def main(args):
             unet, optimizer, train_dataloader, lr_scheduler
         )
 
+    # unet = torch.nn.DataParallel(model)
+
+    
     # For mixed precision training we cast the text_encoder and vae weights to half-precision
     # as these models are only used for inference, keeping weights in full precision is not required.
     weight_dtype = torch.float32
@@ -1096,6 +1102,7 @@ def main(args):
         
         unet_lora_state_dict = convert_state_dict_to_diffusers(get_peft_model_state_dict(unwrapped_unet))
         
+        os.makedirs(args.output_dir, exist_ok=True)
         StableDiffusionPipeline.save_lora_weights(
             save_directory=args.output_dir,
             unet_lora_layers=unet_lora_state_dict,

@@ -8,6 +8,7 @@ from torchvision import transforms
 from pipeline_stable_diffusion_pie import StableDiffusionPIEPipeline
 from diffusers import AutoencoderKL, DDPMScheduler, DiffusionPipeline, UNet2DConditionModel
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 def set_all_seeds(SEED):
     # REPRODUCIBILITY
@@ -28,8 +29,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--finetune_lora_path",
         type=str,
-        default="finetune_checkpoints",
-        required=True,
+        default=None,
         help="Path to lora finetune ckpt.",
     )
     parser.add_argument(
@@ -112,7 +112,7 @@ def main(args):
     output_dir = args.output_dir
 
     if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
     
     device = "cuda" 
     # original train from scratch
@@ -120,15 +120,23 @@ def main(args):
     # using pretrained model
     # pipe = StableDiffusionPIEPipeline.from_pretrained(model_id_or_path, torch_dtype=torch.float16, cache_dir="./checkpoints", safety_checker=None)
     
-    pipe = DiffusionPipeline.from_pretrained(
-                model_id_or_path,
-                revision=args.revision,
-                # variant=args.variant,
-                torch_dtype=torch.float16,
-            )
+    
+    if args.finetune_lora_path != None:
+        pipe = DiffusionPipeline.from_pretrained(
+                    model_id_or_path,
+                    revision=args.revision,
+                    # variant=args.variant,
+                    torch_dtype=torch.float16,
+                )
 
-    # load attention processors
-    pipe.load_lora_weights(args.finetune_lora_path)
+        # load attention processors
+        pipe.load_lora_weights(args.finetune_lora_path)
+    else:
+        pipe = StableDiffusionPIEPipeline.from_pretrained(model_id_or_path, 
+                                                          torch_dtype=torch.float16, 
+                                                          safety_checker=None,
+                                                          cache_dir="./cache",)
+    
 
     
     if finetuned_path != None:
@@ -144,7 +152,7 @@ def main(args):
             transforms.CenterCrop(resolution)
         ]
     )
-
+ 
     images = []
     step_i = 0
     init_image = Image.open(image_path).convert("RGB")   # The unedited image
@@ -162,7 +170,7 @@ def main(args):
     step_i += 1
     img = init_image
     images.append(img)
-
+    
     while step_i <= ddim_times:
         img = pipe(prompt=prompt, image=img, mask=mask, init_image=init_image, strength=strength, guidance_scale=guidance_scale).images[0]
         images.append(img)
@@ -171,7 +179,8 @@ def main(args):
 
     duration = 1000
     images[0].save(os.path.join(output_dir, f'output_{prompt}.gif'), save_all=True, append_images=images[1:], duration=duration)
-
+    print(f"PIE generation completed, the output is saved at {output_dir}")
+    
 if __name__ == "__main__":
     args = parse_args()
     main(args)

@@ -10,6 +10,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 from sklearn.metrics import roc_auc_score
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '5,6'
 
 def set_all_seeds(SEED):
     # REPRODUCIBILITY
@@ -36,15 +38,20 @@ testloader =  torch.utils.data.DataLoader(testSet, batch_size=BATCH_SIZE, num_wo
 set_all_seeds(SEED)
 model = DenseNet121(pretrained=True, last_activation=None, activations='relu', num_classes=5)
 model = model.cuda()
+# import torch.nn as nn
+# device_ids = [5,6]
+# model = nn.DataParallel(model, device_ids=device_ids).cuda()
 
 # define loss & optimizer
 CELoss = CrossEntropyLoss()
 optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # training
+from tqdm import tqdm
+print('Start training...')
 best_val_auc = 0 
-for epoch in range(10):
-    for idx, data in enumerate(trainloader):
+for epoch in tqdm(range(10)):
+    for idx, data in tqdm(enumerate(trainloader), leave=False):
         train_data, train_labels = data
         train_data, train_labels  = train_data.cuda(), train_labels.cuda()
         y_pred = model(train_data)

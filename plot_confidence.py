@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 from libauc.datasets import CheXpert
 from libauc.models import densenet121 as DenseNet121
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Plot the classification confidence score results")
     parser.add_argument(
@@ -58,7 +60,7 @@ def main(args):
     sigmoid = nn.Sigmoid()
 
     model = DenseNet121(pretrained=False, last_activation=None, activations='relu', num_classes=1)
-    checkpoint = torch.load(args.model_path)
+    checkpoint = torch.load(args.model_path, weights_only=True)
     model.load_state_dict(checkpoint)
     model = model.cuda()
     model.eval()
@@ -66,6 +68,7 @@ def main(args):
     index = []
     value = []
 
+    # first_img, last_img = None, None
     for i in range(0, count+1):
         image_path = os.path.join(IMG_PATH, str(i) + ".png")
         image = cv2.imread(image_path, 0)
@@ -84,12 +87,31 @@ def main(args):
         image = image.unsqueeze(0)
         image = image.cuda()
 
+        # if i == 0: 
+        #     first_img = image
+        # if i == count:
+        #     last_img = image
+            
         with torch.no_grad():  
             index.append(i)
             value.append(sigmoid(model(image)).cpu().numpy()[0][0])
-
+        
+        # print("Image: ", i, " Confidence: ", value[-1])
+         
+    # pred_first = model(first_img.cpu().detach().numpy())
+    # pred_last = model(last_img.cpu().detach().numpy())
+                
+    # val_auc =  roc_auc_score(test_true, test_pred) 
+    # print ('Epoch=%s, BatchID=%s, Val_AUC=%.4f, lr=%.4f'%(epoch, idx, val_auc,  optimizer.lr))
+    # print('ok args.plot_path:', args.plot_path)
+    # exit()
+    
     plt.plot(index, value)
     plt.savefig(args.plot_path)
+    with open(args.plot_path.replace(".png", ".txt"), "w") as f:
+        f.write("image_step, confidence_value\n")
+        for i, v in zip(index, value):
+            f.write(f"{i}, {v}\n")
 
 if __name__ == "__main__":
     args = parse_args()
